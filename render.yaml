@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: sport-shop-nhom14
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@sportshop.local
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: sport-shop-data
+      mountPath: /var/data
+      sizeGB: 1

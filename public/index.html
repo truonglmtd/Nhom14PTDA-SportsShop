@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sport Shop | Năng lượng thể thao</title><link rel="stylesheet" href="/style.css"></head>
+    <link rel="stylesheet" href="style.css">
+    <title>Sport Shop | Năng lượng thể thao</title><link rel="stylesheet" href="/style.css"></head>
+
+<body>
+<div class="topline">MIỄN PHÍ VẬN CHUYỂN CHO ĐƠN HÀNG TỪ 799.000₫</div>
+<header class="header"><a class="logo" href="#" onclick="showPage('home')"><span class="logo-mark">S</span> SPORT<span>SHOP</span></a>
+<nav><a href="#" onclick="showPage('home')">Trang chủ</a><a href="#about" onclick="showPage('about')">Giới thiệu</a><a href="#products" onclick="showPage('home')">Thể loại</a><a href="#" onclick="showPage('orders')">Đơn hàng</a></nav>
+<div class="head-actions"><button class="iconbtn" onclick="showPage('favorites')" title="Yêu thích">♡</button><button class="cartbtn" onclick="showPage('cart')">Giỏ hàng <b id="cartCount">0</b></button><button id="accountBtn" class="accountbtn" onclick="showPage('account')">Đăng nhập</button></div></header>
+<main id="app">
+<section class="hero"><div class="hero-copy"><p class="eyebrow">MOVE YOUR WAY · 2026 COLLECTION</p><h1>Vượt giới hạn.<br><em>Bứt phá chính mình.</em></h1><p class="hero-sub">Trang bị tốt hơn. Tập luyện mạnh mẽ hơn. Khám phá bộ sưu tập thể thao dành cho mọi hành trình của bạn.</p><button class="primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">KHÁM PHÁ NGAY <span>↗</span></button><div class="hero-stats"><div><b>100%</b><small>Chính hãng</small></div><div><b>Đổi trả 7 ngày</b><small>Mua sắm an tâm</small></div><div><b>Giao hàng</b><small>Toàn quốc</small></div></div></div><div class="hero-art"><div class="circle"></div><img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=1100" alt="Vận động viên chạy bộ"><div class="floating-tag">TRAIN HARD<br><b>LIVE BETTER.</b></div></div></section>
+<section class="benefits"><div>✦ <span><b>Sản phẩm chất lượng</b><small>Chọn lọc cho vận động</small></span></div><div>↗ <span><b>Giao hàng toàn quốc</b><small>Theo dõi đơn dễ dàng</small></span></div><div>◇ <span><b>Thanh toán linh hoạt</b><small>COD khi nhận hàng</small></span></div><div>♡ <span><b>Hỗ trợ tận tâm</b><small>Luôn đồng hành cùng bạn</small></span></div></section>
+<section class="products-section" id="products"><div class="section-heading"><div><p class="eyebrow">CHỌN ĐỒ CHUẨN · TẬP CHẤT</p><h2>Sản phẩm nổi bật<span>.</span></h2></div><p>Những món đồ sẵn sàng đồng hành cùng mục tiêu của bạn.</p></div>
+<div class="toolbar"><div class="searchbox"><span>⌕</span><input id="search" placeholder="Tìm giày, áo, phụ kiện..." oninput="loadProducts()"></div><div id="categories" class="categories"><button class="cat active" onclick="setCategory('',this)">Tất cả</button></div><select id="sort" onchange="loadProducts()"><option value="default">Sắp xếp: Mặc định</option><option value="low">Giá tăng dần</option><option value="high">Giá giảm dần</option></select></div>
+<div id="productGrid" class="product-grid"></div></section>
+<section id="about" class="about"><div><p class="eyebrow">OUR PHILOSOPHY</p><h2>Không chỉ là thể thao.<br><em>Đó là phong cách sống.</em></h2></div><p>Sport Shop mang đến các sản phẩm thể thao tiện dụng, giúp bạn tự tin tập luyện, khám phá và chinh phục mục tiêu mỗi ngày.</p></section>
+</main>
+<footer><a class="logo" href="#"><span class="logo-mark">S</span> SPORT<span>SHOP</span></a><p>Chuyển động mỗi ngày. Bứt phá mỗi giới hạn.</p><small>© 2026 Sport Shop · Website đồ án nhóm 14</small></footer>
+<div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()"><div class="modal-card"><button class="close" onclick="closeModal()">×</button><div id="modalContent"></div></div></div><div id="toast" class="toast"></div>
+<script src="/app.js"></script></body></html>
