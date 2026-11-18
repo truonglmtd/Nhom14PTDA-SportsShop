@@ -152,10 +152,71 @@ app.post('/api/orders',auth,(req,res)=>{
  });
  try{res.json({message:'Đặt hàng thành công!',order:create()});}catch(e){res.status(400).json({error:e.message||'Không thể tạo đơn hàng.'});}
 });
-app.get('/api/my-orders',auth,(req,res)=>{
- const orders=db.prepare('SELECT * FROM orders WHERE user_id=? ORDER BY id DESC').all(req.session.user.id);
- res.json(orders.map(o=>({...o,items:db.prepare('SELECT * FROM order_items WHERE order_id=?').all(o.id)})));
+
+
+// Khách hàng hủy đơn hàng
+app.patch('/api/my-orders/:id/cancel', auth, (req, res) => {
+    const orderId = Number(req.params.id);
+    const userId = req.session.user.id;
+
+    try {
+        const cancelOrder = db.transaction(() => {
+            const order = db.prepare(
+                'SELECT * FROM orders WHERE id = ? AND user_id = ?'
+            ).get(orderId, userId);
+
+            if (!order) {
+                throw new Error('Không tìm thấy đơn hàng.');
+            }
+
+            if (order.status !== 'Chờ xác nhận') {
+                throw new Error('Chỉ có thể hủy đơn hàng đang chờ xác nhận.');
+            }
+
+            const items = db.prepare(
+                'SELECT product_id, quantity FROM order_items WHERE order_id = ?'
+            ).all(orderId);
+
+            // Hoàn trả số lượng sản phẩm vào kho
+            for (const item of items) {
+                if (item.product_id) {
+                    db.prepare(
+                        'UPDATE products SET stock = stock + ? WHERE id = ?'
+                    ).run(item.quantity, item.product_id);
+                }
+            }
+
+            // Cập nhật trạng thái đơn hàng
+            db.prepare(
+                "UPDATE orders SET status = 'Đã hủy' WHERE id = ?"
+            ).run(orderId);
+        });
+
+        cancelOrder();
+
+        res.json({ message: 'Hủy đơn hàng thành công!' });
+
+    } catch (e) {
+        res.status(400).json({
+            error: e.message || 'Không thể hủy đơn hàng.'
+        });
+    }
 });
+
+// Lấy danh sách đơn hàng của khách hàng
+app.get('/api/my-orders', auth, (req, res) => {
+    const orders = db.prepare(
+        'SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC'
+    ).all(req.session.user.id);
+
+    res.json(orders.map(o => ({
+        ...o,
+        items: db.prepare(
+            'SELECT * FROM order_items WHERE order_id = ?'
+        ).all(o.id)
+    })));
+});
+
 app.get('/api/admin/products',auth,admin,(req,res)=>res.json(db.prepare('SELECT p.*,c.name category FROM products p LEFT JOIN categories c ON c.id=p.category_id ORDER BY p.id DESC').all()));
 app.post('/api/admin/products',auth,admin,(req,res)=>{
  const {name,description='',price,stock,image='',category_id}=req.body;
@@ -169,9 +230,42 @@ app.put('/api/admin/products/:id',auth,admin,(req,res)=>{
  db.prepare('UPDATE products SET name=?,description=?,price=?,stock=?,image=?,category_id=? WHERE id=?').run(name.trim(),description,Number(price),Number(stock),image,category_id?Number(category_id):null,Number(req.params.id));
  res.json({message:'Đã cập nhật sản phẩm.'});
 });
+
 app.delete('/api/admin/products/:id',auth,admin,(req,res)=>{
  db.prepare('UPDATE products SET active=0 WHERE id=?').run(Number(req.params.id));res.json({message:'Đã ẩn sản phẩm.'});
 });
+
+app.patch('/api/admin/products/:id/restore', auth, admin, (req, res) => {
+    try {
+        const id = Number(req.params.id);
+
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({
+                error: 'Mã sản phẩm không hợp lệ.'
+            });
+        }
+
+        const result = db.prepare(
+            'UPDATE products SET active = 1 WHERE id = ?'
+        ).run(id);
+
+        if (result.changes === 0) {
+            return res.status(404).json({
+                error: 'Không tìm thấy sản phẩm.'
+            });
+        }
+
+        res.json({
+            message: 'Đã hiển thị lại sản phẩm thành công!'
+        });
+
+    } catch (e) {
+        res.status(500).json({
+            error: 'Không thể hiển thị sản phẩm.'
+        });
+    }
+});
+
 app.get('/api/admin/orders',auth,admin,(req,res)=>res.json(db.prepare(`SELECT o.*,u.email FROM orders o LEFT JOIN users u ON u.id=o.user_id ORDER BY o.id DESC`).all().map(o=>({...o,items:db.prepare('SELECT * FROM order_items WHERE order_id=?').all(o.id)}))));
 app.patch('/api/admin/orders/:id',auth,admin,(req,res)=>{
  const allowed=['Chờ xác nhận','Đang xử lý','Đang giao','Hoàn thành','Đã hủy'];
